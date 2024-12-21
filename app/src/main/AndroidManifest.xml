@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
 
     <application
         android:allowBackup="true"
@@ -47,6 +48,10 @@
             android:theme="@style/Theme.Bjut.NoActionBar"/>
         <activity
             android:name=".ui.library.BookDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Bjut.NoActionBar"/>
+        <activity
+            android:name=".ui.home.MailActivity"
             android:exported="false"
             android:theme="@style/Theme.Bjut.NoActionBar"/>
 

@@ -213,4 +213,16 @@ class BjutAPI {
             .get("https://itsapp.bjut.edu.cn/borrow/wap/default/info?title=",true,callback)
     }
 
+    fun getMailList(ses: String,callback: Callback){
+        HttpUtils().addHeader("Cookie","eai-sess=$ses;")
+            .addHeader("User-Agent","ZhilinEai ZhilinBjutApp/2.5")
+            .post("https://itsapp.bjut.edu.cn/bjutapp/wap/index/fixed-app",callback)
+    }
+
+    fun getMailUrl(ses: String,ourl:String,callback: Callback){
+        HttpUtils().addHeader("Cookie","eai-sess=$ses;")
+            .addHeader("User-Agent","ZhilinEai ZhilinBjutApp/2.5")
+            .get(ourl,false,callback)
+    }
+
 }
