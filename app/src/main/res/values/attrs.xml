@@ -3,4 +3,11 @@
     <attr name="header_background" format="color" />
     <attr name="cell_background" format="color" />
     <attr name="textColor" format="color" />
+
+    <declare-styleable name="ChatTheme">
+        <attr name="sentMessageBackgroundColor" format="color" />
+        <attr name="sentMessageTextColor" format="color" />
+        <attr name="receivedMessageBackgroundColor" format="color" />
+        <attr name="receivedMessageTextColor" format="color" />
+    </declare-styleable>
 </resources>

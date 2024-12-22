@@ -11,4 +11,14 @@
 
     <color name="header_background_dark">#202020</color>
     <color name="cell_background_dark">#262626</color>
+
+    <color name="sent_message_bg_light">#E3F2FD</color>      <!-- Light Blue 50 -->
+    <color name="sent_message_text_light">#1565C0</color>    <!-- Blue 800 -->
+    <color name="received_message_bg_light">#F5F5F5</color>  <!-- Grey 100 -->
+    <color name="received_message_text_light">#212121</color><!-- Grey 900 -->
+
+    <color name="sent_message_bg_dark">#1565C0</color>       <!-- Blue 800 -->
+    <color name="sent_message_text_dark">#E3F2FD</color>     <!-- Light Blue 50 -->
+    <color name="received_message_bg_dark">#424242</color>   <!-- Grey 800 -->
+    <color name="received_message_text_dark">#FFFFFF</color> <!-- White -->
 </resources>

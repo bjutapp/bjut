@@ -225,4 +225,12 @@ class BjutAPI {
             .get(ourl,false,callback)
     }
 
+    fun getAIConversationId(visitorId: String,visitorVc:String,callback: Callback){
+        val robotID="5ae979d078284514b60512512b21e0b9"
+        HttpUtils().addHeader("Cookie","visitorId=$visitorId; visitorVc=$visitorVc;")
+            .addHeader("Referer","https://robot.chaoxing.com/chatDigitalHuman/web?accessToken=&unitId=30211&robotId=$robotID&toonPreset=star&openType=openUrl")
+            .addHeader("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36")
+            .get("https://robot.chaoxing.com/v1/front/clearConversation?unitId=30211&robotId=$robotID&visitorId=$visitorId&channel=WEB",true,callback)
+    }
+
 }

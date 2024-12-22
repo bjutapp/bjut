@@ -81,7 +81,8 @@
         android:layout_marginTop="16dp"
         android:textAlignment="center"
         android:textSize="14sp"
-        android:text="注意：这是校内VPN所用的动态验证码。请妥善保管OTP Data，在本APP被清除数据或者卸载之后不可恢复，且经过首次注册后不可再次绑定，如要重置请去信息楼。"
+        android:text="注意：这是校内VPN所用的动态验证码。请妥善保管OTP Data，在本APP被清除数据或者卸载之后不可恢复，且经过首次注册后不可再次绑定，如要重置请去信息楼。
+\n\n自2025年1月15日后，仅申请开通的师生有使用权限"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/text_otptime" />

@@ -15,6 +15,11 @@
         <item name="header_background">@color/header_background_dark</item>
         <item name="cell_background">@color/cell_background_dark</item>
         <item name="textColor">@color/white</item>
+
+        <item name="sentMessageBackgroundColor">@color/sent_message_bg_dark</item>
+        <item name="sentMessageTextColor">@color/sent_message_text_dark</item>
+        <item name="receivedMessageBackgroundColor">@color/received_message_bg_dark</item>
+        <item name="receivedMessageTextColor">@color/received_message_text_dark</item>
     </style>
 
     <style name="Theme.Bjut.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark" />

@@ -2,6 +2,7 @@ package com.hlwdy.bjut.ui.schedule
 
 import android.content.Context
 import android.graphics.Color
+import android.icu.util.Calendar
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -152,15 +153,24 @@ class ScheduleFragment : BaseFragment() {
         return Color.rgb(red, green, blue)
     }
 
+    fun getDayOfWeek(): Int {
+        val calendar = Calendar.getInstance()
+        val day = calendar.get(Calendar.DAY_OF_WEEK)
+        // Calendar.SUNDAY = 1, Calendar.MONDAY = 2, ... Calendar.SATURDAY = 7
+        // 转换成周一为1，周日为7的格式
+        return if (day == Calendar.SUNDAY) 7 else day - 1
+    }
 
     private fun createSchedule(courses: List<Course>) {
         val table = binding.scheduleTable
 
+        val curDay=getDayOfWeek()
         // Add header row
         val headerRow = TableRow(context)
         headerRow.addView(createTextView("时间", isHeader = true))
         viewModel.days.forEach { day ->
-            headerRow.addView(createTextView(day, isHeader = true))
+            if(day==viewModel.days[curDay-1])headerRow.addView(createTextView(day, isHeader = true, colorInt = Color.GRAY))
+            else headerRow.addView(createTextView(day, isHeader = true))
         }
         table.addView(headerRow)
 
@@ -223,7 +233,8 @@ class ScheduleFragment : BaseFragment() {
             setPadding(8, 18, 8, 18)
             ellipsize = TextUtils.TruncateAt.END
             if (isHeader) {
-                setBackgroundColor(context.getCustomColor(R.attr.header_background))
+                if(colorInt!=0)setBackgroundColor(colorInt)
+                else setBackgroundColor(context.getCustomColor(R.attr.header_background))
                 setTypeface(null, android.graphics.Typeface.BOLD)
             } else if (isCourse) {
                 setBackgroundColor(colorInt)
