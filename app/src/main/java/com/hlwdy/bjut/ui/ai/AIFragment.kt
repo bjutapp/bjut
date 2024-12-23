@@ -20,21 +20,33 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import com.hlwdy.bjut.BaseFragment
 import com.hlwdy.bjut.BjutAPI
 import com.hlwdy.bjut.R
 import com.hlwdy.bjut.appLogger
 import com.hlwdy.bjut.databinding.FragmentAiBinding
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.Markwon
+import io.noties.markwon.MarkwonConfiguration
+import io.noties.markwon.ext.latex.JLatexMathPlugin
+import io.noties.markwon.ext.tables.TablePlugin
+import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin
+import io.noties.markwon.syntax.SyntaxHighlightPlugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
@@ -56,6 +68,7 @@ class AIFragment : BaseFragment() {
     private lateinit var binding: FragmentAiBinding
     private lateinit var adapter: ChatAdapter
     private val viewModel: ChatViewModel by viewModels()
+    private lateinit var markwon: Markwon
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -125,7 +138,22 @@ class AIFragment : BaseFragment() {
 
     private fun setupRecyclerView() {
         binding.chatRecyclerView.itemAnimator = null
-        adapter = ChatAdapter()
+
+        // 配置 Markwon
+        markwon = Markwon.builder(requireContext())
+            .usePlugin(object : AbstractMarkwonPlugin() {
+                override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
+                    builder.linkResolver { view, link ->
+                        // 可以自定义链接点击行为
+                    }
+                }
+            })
+            //.usePlugin(SyntaxHighlightPlugin.create())
+            .usePlugin(TablePlugin.create(requireContext()))
+            .usePlugin(MarkwonInlineParserPlugin.create())
+            //.usePlugin(JLatexMathPlugin.create(44f)) // 使用 JLatexMathPlugin
+            .build()
+        adapter = ChatAdapter(markwon)
         binding.chatRecyclerView.apply {
             layoutManager = LinearLayoutManager(context).apply {
                 stackFromEnd = true
@@ -135,6 +163,15 @@ class AIFragment : BaseFragment() {
     }
 
     private fun setupMessageInput() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.isSendEnabled.collect { isEnabled ->
+                    binding.sendButton.isEnabled = isEnabled
+                    binding.messageInput.isEnabled=isEnabled
+                }
+            }
+        }
+
         binding.sendButton.setOnClickListener {
             val message = binding.messageInput.text.toString().trim()
             if (message.isNotEmpty()) {
@@ -184,6 +221,11 @@ class AIFragment : BaseFragment() {
         super.onResume()
         viewModel.onResume()
     }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.onPause()
+    }
 }
 
 data class ChatMessage(
@@ -193,31 +235,30 @@ data class ChatMessage(
     val isStreaming: Boolean = false  // 表示是否是正在流式传输的消息
 )
 
-class ChatAdapter : ListAdapter<ChatMessage, ChatAdapter.MessageViewHolder>(MessageDiffCallback()) {
+class ChatAdapter(private val markwon: Markwon) : ListAdapter<ChatMessage, ChatAdapter.MessageViewHolder>(MessageDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_chat_message, parent, false)
-        return MessageViewHolder(view)
+        return MessageViewHolder(view,markwon)
     }
 
     override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    class MessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class MessageViewHolder(itemView: View,private val markwon: Markwon) : RecyclerView.ViewHolder(itemView) {
         private val messageCard: MaterialCardView = itemView.findViewById(R.id.messageCard)
         private val messageText: TextView = itemView.findViewById(R.id.messageText)
 
         fun bind(message: ChatMessage) {
-            messageText.text = message.content
-
             val context = itemView.context
             // 获取主题中定义的颜色
             val typedValue = TypedValue()
             val theme = context.theme
 
             if (message.isSentByMe) {
+                messageText.text = message.content
                 // 发送的消息
                 theme.resolveAttribute(R.attr.sentMessageBackgroundColor, typedValue, true)
                 messageCard.setCardBackgroundColor(typedValue.data)
@@ -233,6 +274,7 @@ class ChatAdapter : ListAdapter<ChatMessage, ChatAdapter.MessageViewHolder>(Mess
                 constraintSet.connect(messageCard.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
                 constraintSet.applyTo(containerLayout)
             } else {
+                markwon.setMarkdown(messageText, message.content)
                 // 接收的消息
                 theme.resolveAttribute(R.attr.receivedMessageBackgroundColor, typedValue, true)
                 messageCard.setCardBackgroundColor(typedValue.data)
@@ -336,7 +378,7 @@ class WebSocketClient(
         }
     }
 
-    suspend fun sendMessage(data: JSONObject) {
+    fun sendMessage(data: JSONObject) {
         try {
             val message = data.toString()
             webSocket?.send(message)
@@ -386,11 +428,14 @@ class ChatViewModel : ViewModel() {
     private var currentMessageId: String? = null
 
     private var listenerJob: Job? = null  // 添加这行来跟踪监听器的协程
-    private var isActive = true  // 添加状态标志
+    private var isActive = false  // 添加状态标志
 
     private var connectionJob: Job? = null
 
     var conversationID=""
+
+    private val _isSendEnabled = MutableStateFlow(true)
+    val isSendEnabled = _isSendEnabled.asStateFlow()
 
     init {
         _messages.value = mutableListOf()
@@ -416,9 +461,12 @@ class ChatViewModel : ViewModel() {
             webSocketClient?.connect()?.let { connected ->
                 if (connected) {
                     startMessageListener()
+                }else{
+                    isActive=false
                 }
             }
         } catch (e: Exception) {
+            isActive=false
             Log.e("ChatViewModel", "WebSocket连接失败", e)
         }
     }
@@ -427,11 +475,23 @@ class ChatViewModel : ViewModel() {
         connectionJob?.cancel()
         connectionJob = viewModelScope.launch {
             connectionJob?.cancelAndJoin()
-            if ((webSocketClient == null || webSocketClient?.isConnected != true) && conversationID!="") {
+            if (!isActive && conversationID!="") {
+                _isSendEnabled.value=true
                 connectWebSocket()
             }
         }
     }
+
+    fun onPause() {
+        isActive = false
+        viewModelScope.launch {
+            webSocketClient?.close()
+        }
+        webSocketClient = null
+        listenerJob?.cancel()
+        connectionJob?.cancel()
+    }
+
 
     private fun startMessageListener() {
         listenerJob = viewModelScope.launch {
@@ -453,6 +513,8 @@ class ChatViewModel : ViewModel() {
     }
 
     fun sendMessage(content: String) {
+        _isSendEnabled.value = false  // 发送时禁用
+
         val currentMessages = _messages.value?.toMutableList() ?: mutableListOf()
         currentMessages.add(ChatMessage(content = content, isSentByMe = true))
         _messages.value = currentMessages
@@ -494,6 +556,7 @@ class ChatViewModel : ViewModel() {
         viewModelScope.launch {
             webSocketClient?.close()
         }
+        _isSendEnabled.value=true
     }
 
     private fun handleServerResponse(response: JSONObject) {
@@ -582,6 +645,8 @@ class ChatViewModel : ViewModel() {
         _messages.postValue(currentMessages)
         currentStreamingMessage = null
         currentMessageId = null
+
+        _isSendEnabled.value = true
     }
 
     fun onDestroy() {

@@ -19,10 +19,10 @@
 * [x] 图书馆相关功能
 * [x] 校内WiFi一键登录
 * [x] 生物验证解锁
-* [ ] 校内邮箱浏览
+* [x] 校内邮箱浏览
 * [ ] 办事大厅
 * [ ] 重要消息提示
-* [ ] 燕小北AI
+* [x] 燕小北AI
 * [ ] 新闻附件直接预览
 
 ## 应用编写说明
@@ -45,6 +45,7 @@
   <img src="./img/7.jpg" height="600">
   <img src="./img/8.jpg" height="600">
   <img src="./img/9.jpg" height="600">
+  <img src="./img/10.jpg" height="600">
 </div>
 
 ## 应用帮助说明
