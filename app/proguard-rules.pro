@@ -31,3 +31,5 @@
 -dontwarn org.openjsse.net.ssl.OpenJSSE
 
 -keep class com.hlwdy.bjut.NativeEncrypthlwdyck {*;}
+
+-dontwarn org.commonmark.ext.gfm.strikethrough.Strikethrough

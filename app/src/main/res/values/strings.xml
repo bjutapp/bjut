@@ -22,6 +22,6 @@
     <string name="shortcut_schedule">课程表</string>
     <string name="shortcut_otp">VPN OTP</string>
 
-    <string name="app_description">本APP是非官方的，第三方免费开源版本，功能实现完全依赖官方接口，个人数据仅保存在本地。目标是集成所有有用的功能。</string>
+    <string name="app_description">本APP是非官方的，第三方免费开源版本，功能实现完全依赖官方接口，个人数据仅保存在本地。目标是集成所有有用的功能，有问题欢迎提出ISSUE。</string>
     <string name="app_website">https://github.com/bjutapp/bjut</string>
 </resources>

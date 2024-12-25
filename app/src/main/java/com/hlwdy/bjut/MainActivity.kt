@@ -53,19 +53,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun refreshWebVpn(){
+    fun refreshWebVpn(isForce:Boolean=false){
         fun getCookieValue(cookieString: String, key: String): String? {
             return cookieString.split(";")
                 .map { it.trim() }
                 .find { it.startsWith("$key=") }
                 ?.substringAfter("=")
         }
-        var time_str=account_session_util(this).getUserDetails()[account_session_util.KEY_WEBVPNTKTIME]
-        if(time_str!=null){
-            if(time_str.toLong()+1200>(System.currentTimeMillis() / 1000L)){
-                //showToast("use tk cache")
-                appLogger.e("Info", "Use WebVPNTK cache:$time_str")
-                return
+        if(!isForce){
+            var time_str=account_session_util(this).getUserDetails()[account_session_util.KEY_WEBVPNTKTIME]
+            if(time_str!=null){
+                if(time_str.toLong()+1200>(System.currentTimeMillis() / 1000L)){
+                    //showToast("use tk cache")
+                    appLogger.e("Info", "Use WebVPNTK cache:$time_str")
+                    return
+                }
             }
         }
         //refresh webvpn tk
@@ -78,6 +80,7 @@ class MainActivity : AppCompatActivity() {
                 var tk=getCookieValue(response.request.headers.get("Cookie").toString(),"wengine_vpn_ticketwebvpn_bjut_edu_cn")
                 updateVPNTK(tk.toString())
                 appLogger.e("Info", "New WebVPN tk $tk")
+                if(isForce)showToast("WEBVPN刷新完毕")
                 //showToast("new webvpn tk $tk")
                 //prelogin to my
                 BjutAPI().WebVpnLoginMy(tk.toString()
@@ -358,7 +361,7 @@ ${res.getString("body")}
                 }
                 true
             }
-            R.id.action_loglook->{
+            R.id.action_logLook->{
                 startActivity(Intent(this, LogViewActivity::class.java))
                 true
             }
@@ -368,6 +371,10 @@ ${res.getString("body")}
             }
             R.id.action_checkUpdate->{
                 checkUpdate(false)
+                true
+            }
+            R.id.action_refreshWebvpn->{
+                refreshWebVpn(true)
                 true
             }
             else -> super.onOptionsItemSelected(item)

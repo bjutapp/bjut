@@ -46,6 +46,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -340,7 +341,10 @@ class WebSocketClient(
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
                     coroutineScope.launch {
-                        messageChannel.send(text)
+                        try {
+                            messageChannel.send(text)
+                        } catch (e: ClosedSendChannelException) {
+                        }
                     }
                 }
 
