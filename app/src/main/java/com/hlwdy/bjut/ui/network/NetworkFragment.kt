@@ -336,6 +336,12 @@ class NetworkFragment : BaseFragment() {
             "noNetwork"->binding.networkStateMonitor.setText("无网络")
             else->binding.networkStateMonitor.setText("error: $networkStates")
         }
+        when(networkStates){
+            "wifi"->binding.btnLogin.visibility=View.VISIBLE
+            "dorm"->binding.btnLogin.visibility=View.VISIBLE
+            "bjut"->binding.btnLogin.visibility=View.VISIBLE
+            else->binding.btnLogin.visibility=View.INVISIBLE
+        }
         if(networkStates=="wifi"&&networkLoginipv4States){
             binding.btnwlgnipv6Login.visibility= View.VISIBLE
         }else{
@@ -353,8 +359,10 @@ class NetworkFragment : BaseFragment() {
         if(networkFlow!=-1L){
             val text=formatFlowSize( networkFlow*1024)
             binding.networkFlowMonitor.setText(text)
+            binding.textView4.visibility=View.VISIBLE
         }else{
             binding.networkFlowMonitor.setText("")
+            binding.textView4.visibility=View.INVISIBLE
         }
     }
     private fun bindWifi(){
@@ -623,6 +631,7 @@ class NetworkFragment : BaseFragment() {
             setPassword(networkAccount)
         }
         binding.btnwlgnipv6Login.visibility= View.INVISIBLE
+        binding.btnLogin.visibility=View.INVISIBLE
         binding.btnwlgnipv6Login.setOnClickListener{
             loginNetworkWifiIpv6(networkAccount)
         }

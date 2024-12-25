@@ -1,5 +1,7 @@
 package com.hlwdy.bjut.ui.home
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -28,12 +30,23 @@ class MailActivity : BaseActivity() {
             webview.settings.javaScriptEnabled=true
             webview.settings.domStorageEnabled=true
             webview.webViewClient = object : WebViewClient() {
-                override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                    if (url != null) {
-                        view?.loadUrl(url)
+                override fun shouldOverrideUrlLoading(view: WebView?, curl: String?): Boolean {
+                    if (curl != null&&curl.contains("mail.bjut.edu.cn")) {
+                        view?.loadUrl(curl)
                         return true
                     }
-                    return false
+                    if(curl!=null&&curl.startsWith("mailto:")){
+                        try{
+                            val intent = Intent(Intent.ACTION_SENDTO, Uri.parse(curl))
+                            view?.context?.startActivity(intent)
+                        }catch (e: Exception) {
+                            showToast("无系统邮箱应用")
+                        }
+                    }else{
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(curl))
+                        view?.context?.startActivity(intent)
+                    }
+                    return true
                 }
 
                 // 对于Android API 24及以上版本
@@ -41,13 +54,24 @@ class MailActivity : BaseActivity() {
                     view: WebView?,
                     request: WebResourceRequest?
                 ): Boolean {
-                    if (url != null) {
-                        request?.url?.let { uri ->
+                    request?.url?.let { uri ->
+                        if (uri != null&&uri.toString().contains("mail.bjut.edu.cn")) {
                             view?.loadUrl(uri.toString())
-                            return true
+                        }else{
+                            if(uri!=null&&uri.toString().startsWith("mailto:")){
+                                try{
+                                    val intent = Intent(Intent.ACTION_SENDTO, Uri.parse(uri.toString()))
+                                    view?.context?.startActivity(intent)
+                                }catch (e: Exception) {
+                                    showToast("无系统邮箱应用")
+                                }
+                            }else{
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri.toString()))
+                                view?.context?.startActivity(intent)
+                            }
                         }
                     }
-                    return false
+                    return true
                 }
             }
             webview.loadUrl(url)

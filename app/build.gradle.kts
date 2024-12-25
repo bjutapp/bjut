@@ -95,16 +95,21 @@ dependencies {
         exclude(group = "org.jetbrains", module = "annotations")
         exclude(group = "org.jetbrains", module = "annotations-java5")
     }
-    implementation("io.noties.markwon:syntax-highlight:4.6.2") {
+    implementation("io.noties.markwon:ext-tables:4.6.2") {
         exclude(group = "org.jetbrains", module = "annotations")
         exclude(group = "org.jetbrains", module = "annotations-java5")
     }
-    implementation("io.noties.markwon:ext-tables:4.6.2") {
+    implementation("io.noties.markwon:html:4.6.2") {
+        exclude(group = "org.jetbrains", module = "annotations")
+        exclude(group = "org.jetbrains", module = "annotations-java5")
+    }
+    /*
+    implementation("io.noties.markwon:syntax-highlight:4.6.2") {
         exclude(group = "org.jetbrains", module = "annotations")
         exclude(group = "org.jetbrains", module = "annotations-java5")
     }
     implementation("io.noties.markwon:ext-latex:4.6.2") {
         exclude(group = "org.jetbrains", module = "annotations")
         exclude(group = "org.jetbrains", module = "annotations-java5")
-    }
+    }*/
 }

@@ -35,10 +35,12 @@ import com.hlwdy.bjut.databinding.FragmentAiBinding
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
 import io.noties.markwon.MarkwonConfiguration
-import io.noties.markwon.ext.latex.JLatexMathPlugin
 import io.noties.markwon.ext.tables.TablePlugin
+import io.noties.markwon.html.HtmlPlugin
+/*
+import io.noties.markwon.ext.latex.JLatexMathPlugin
 import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin
-import io.noties.markwon.syntax.SyntaxHighlightPlugin
+import io.noties.markwon.syntax.SyntaxHighlightPlugin*/
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -150,7 +152,8 @@ class AIFragment : BaseFragment() {
             })
             //.usePlugin(SyntaxHighlightPlugin.create())
             .usePlugin(TablePlugin.create(requireContext()))
-            .usePlugin(MarkwonInlineParserPlugin.create())
+            .usePlugin(HtmlPlugin.create())
+            //.usePlugin(MarkwonInlineParserPlugin.create())
             //.usePlugin(JLatexMathPlugin.create(44f)) // 使用 JLatexMathPlugin
             .build()
         adapter = ChatAdapter(markwon)
@@ -562,11 +565,10 @@ class ChatViewModel : ViewModel() {
     private fun handleServerResponse(response: JSONObject) {
         if (response.optString("type") == "KEEPALIVE") return
 
+        val messageId = response.optString("messageId")
+        val answer = response.optString("answer")
         try {
-            val messageId = response.optString("messageId")
-            val answer = response.optString("answer")
             val answerJson = JSONObject(answer)
-
             //println(answer)
 
             when {
@@ -588,7 +590,15 @@ class ChatViewModel : ViewModel() {
                 }
             }
         } catch (e: Exception) {
-            Log.e("ChatViewModel", "响应处理失败", e)
+            //html
+            if (messageId != currentMessageId) {
+                currentMessageId = messageId
+                currentStreamingMessage = StringBuilder()
+            }
+            currentStreamingMessage?.append(answer)
+            updateCurrentMessage()
+            _isSendEnabled.value = true
+            //Log.e("ChatViewModel", "响应处理失败", e)
         }
     }
 
