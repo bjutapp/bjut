@@ -4,33 +4,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <WebView
+        android:id="@+id/news_webview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:id="@+id/news_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:ellipsize="end"
-                android:maxLines="2"/>
-        </LinearLayout>
-
-        <WebView
-            android:id="@+id/news_webview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    </LinearLayout>
+    <TextView
+        android:id="@+id/news_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorOnPrimary"
+        android:elevation="4dp"
+        android:padding="16dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:ellipsize="end"
+        android:maxLines="2"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/attachmentButton"

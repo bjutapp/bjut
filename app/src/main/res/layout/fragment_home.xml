@@ -102,11 +102,27 @@
                 android:padding="12dp"
                 android:gravity="center">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/baseline_email_24"
-                    app:tint="?attr/colorPrimary" />
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/baseline_email_24"
+                        app:tint="?attr/colorPrimary" />
+
+                    <View
+                        android:id="@+id/mailNotificationDot"
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:layout_gravity="end|top"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/notification_dot"
+                        android:visibility="invisible" />
+
+                </FrameLayout>
 
                 <TextView
                     android:layout_width="wrap_content"

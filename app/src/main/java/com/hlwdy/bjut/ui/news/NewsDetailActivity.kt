@@ -39,6 +39,8 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class NewsDetailActivity : BaseActivity() {
+    private var isHiding = false
+
     fun showToast(message: String) {
         android.os.Handler(this.mainLooper).post {
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
@@ -79,13 +81,62 @@ class NewsDetailActivity : BaseActivity() {
                         }
                         return super.shouldInterceptRequest(view, request)
                     }
+
+                    override fun shouldOverrideUrlLoading(view: WebView?, curl: String?): Boolean {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(curl))
+                        view?.context?.startActivity(intent)
+                        return true
+                    }
+
+                    // 对于Android API 24及以上版本
+                    override fun shouldOverrideUrlLoading(
+                        view: WebView?,
+                        request: WebResourceRequest?
+                    ): Boolean {
+                        request?.url?.let { uri ->
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri.toString()))
+                            view?.context?.startActivity(intent)
+                        }
+                        return true
+                    }
                 }
             }
+
+            val newsTitle=findViewById<TextView>(R.id.news_title)
+            webview.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
+                // 计算滚动距离
+                val scrollDelta = scrollY - oldScrollY
+                // 添加一个阈值，避免微小滚动触发动画
+                if (Math.abs(scrollDelta) < 10) return@setOnScrollChangeListener
+
+                if (scrollDelta > 0) { // 向下滚动
+                    if (!isHiding && newsTitle.translationY == 0f) {
+                        isHiding = true
+                        newsTitle.animate()
+                            .translationY(-newsTitle.height.toFloat())
+                            .setDuration(200)
+                            .withEndAction { isHiding = false }
+                            .start()
+                    }
+                } else { // 向上滚动
+                    if (!isHiding && newsTitle.translationY < 0) {
+                        isHiding = true
+                        newsTitle.animate()
+                            .translationY(0f)
+                            .setDuration(200)
+                            .withEndAction { isHiding = false }
+                            .start()
+                    }
+                }
+            }
+            val titleDp = (newsTitle.height / resources.displayMetrics.density).toInt()
+
             val Newcontent=content.replace("bgdwzq120.bjut.edu.cn/","webvpn.bjut.edu.cn/https/77726476706e69737468656265737421f2f0458b3d2139022e468ba68d416d30c350f5ad89/")
                 .replace("rsc.bjut.edu.cn/","webvpn.bjut.edu.cn/https/77726476706e69737468656265737421e2e442d2253a7d44300d8db9d6562d/")
             webview.loadDataWithBaseURL(null,
                 "$Newcontent <script type=\"text/javascript\">var tables = document.getElementsByTagName(\"img\");for(var i = 0; i<tables.length; i++){tables[i].style.width = \"100%\";tables[i].style.height = \"auto\";}</script>"
-                +"<style>@media (prefers-color-scheme: dark) { body,span{ background-color: #121212 !important; color: #cfcfcf  !important; } p{ background-color: #121212 !important; } }table { border-color: #333 !important; } th, td { border-color: #333 !important; }</style>",
+                +"<style>@media (prefers-color-scheme: dark) { body,span{ background-color: #121212 !important; color: #cfcfcf  !important; } p{ background-color: #121212 !important; } }table { border-color: #333 !important; } th, td { border-color: #333 !important; }</style>"
+                +"<style>body{margin-top:${titleDp}px;}</style>",
                 "text/html", "UTF-8", null)
         }
     }

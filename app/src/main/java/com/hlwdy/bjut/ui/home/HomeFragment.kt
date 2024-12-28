@@ -57,6 +57,33 @@ class HomeFragment : BaseFragment() {
     private var isWaitMail=false
     private var isLoadingMail=false
 
+    fun showMailNotification(flag:Boolean){
+        if(flag)binding.mailNotificationDot.visibility=View.VISIBLE
+        else binding.mailNotificationDot.visibility=View.INVISIBLE
+    }
+
+    fun checkMailNew(data: String): Boolean {
+        val res = JSONObject(data)
+        var hasNew=false
+        if(res.getString("e")=="0"){
+            val tmp=res.getJSONObject("d").getJSONArray("fixed_app")
+            for (i in 0 until tmp.length()){
+                if(tmp.getJSONObject(i).getString("key")=="wdyj"){
+                    val l=tmp.getJSONObject(i).getJSONArray("email")
+                    for (j in 0 until l.length()) {
+                        val classObject = l.getJSONObject(j)
+                        if(classObject.getString("value")!="0"){
+                            hasNew=true
+                            break
+                        }
+                    }
+                    break
+                }
+            }
+        }
+        return hasNew
+    }
+
     fun drawMailInfo(data: String){
         val res = JSONObject(data)
         if(res.getString("e")=="0"){
@@ -206,14 +233,15 @@ class HomeFragment : BaseFragment() {
 
             override fun onResponse(call: Call, response: Response) {
                 mailRes=response.body?.string().toString()
-                if(isWaitMail){
-                    activity?.let { fragmentActivity ->
-                        Handler(Looper.getMainLooper()).post {
-                            if (isAdded) {
+                activity?.let { fragmentActivity ->
+                    Handler(Looper.getMainLooper()).post {
+                        if (isAdded) {
+                            if(isWaitMail){
                                 isWaitMail=false
                                 drawMailInfo(mailRes)
                                 hideLoading()
                             }
+                            showMailNotification(checkMailNew(mailRes))
                         }
                     }
                 }
@@ -252,6 +280,7 @@ class HomeFragment : BaseFragment() {
             startActivity(intent)
         }
 
+        //showMailNotification(false)
         binding.btnMail.setOnClickListener{
             if(mailRes!=""){
                 drawMailInfo(mailRes)

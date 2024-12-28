@@ -89,35 +89,64 @@ class BjutAPI {
                                             .addHeader("User-Agent","ZhilinEai ZhilinBjutApp/2.5")
                                             .addHeader("x-requested-with","cn.edu.bjut.app")
                                             .addHeader("Cookie", cookies1)
-                                            .get(newUrl,true,
+                                            .get(newUrl,false,//bjutceshi 301
                                                 object :
                                                     Callback {
                                                     override fun onFailure(call: Call, e: IOException) {
                                                         callback.onFailure(call,e)
                                                     }
                                                     override fun onResponse(call: Call, response: Response) {
-                                                        //replace
-                                                        newUrl= response.request.url.toString().replace("/http/", "/https/")
-                                                        //callback.onResponse(call,response)
+                                                        newUrl=response.headers["Location"].toString()//bjutceshi http
                                                         HttpUtils()
                                                             .addHeader("User-Agent","ZhilinEai ZhilinBjutApp/2.5")
                                                             .addHeader("x-requested-with","cn.edu.bjut.app")
                                                             .addHeader("Cookie", cookies)
-                                                            .get(newUrl,true,
+                                                            .get(newUrl,false,
                                                                 object :
                                                                     Callback {
                                                                     override fun onFailure(call: Call, e: IOException) {
                                                                         callback.onFailure(call,e)
                                                                     }
                                                                     override fun onResponse(call: Call, response: Response) {
-                                                                        newUrl= response.request.url.toString().replace("/http/", "/https/")
+                                                                        //newUrl=response.headers["Location"].toString()//http to https 301
+                                                                        newUrl=response.request.url.toString().replace("http:", "https:")
                                                                         HttpUtils()
                                                                             .addHeader("User-Agent","ZhilinEai ZhilinBjutApp/2.5")
                                                                             .addHeader("x-requested-with","cn.edu.bjut.app")
                                                                             .addHeader("Cookie", cookies)
-                                                                            .get(newUrl,true,callback)
+                                                                            .get(newUrl,true,
+                                                                                object :
+                                                                                    Callback {
+                                                                                    override fun onFailure(call: Call, e: IOException) {
+                                                                                        callback.onFailure(call,e)
+                                                                                    }
+                                                                                    override fun onResponse(call: Call, response: Response) {
+                                                                                        //replace
+                                                                                        newUrl= response.request.url.toString().replace("/http/", "/https/")
+                                                                                        //callback.onResponse(call,response)
+                                                                                        HttpUtils()
+                                                                                            .addHeader("User-Agent","ZhilinEai ZhilinBjutApp/2.5")
+                                                                                            .addHeader("x-requested-with","cn.edu.bjut.app")
+                                                                                            .addHeader("Cookie", cookies)
+                                                                                            .get(newUrl,true,
+                                                                                                object :
+                                                                                                    Callback {
+                                                                                                    override fun onFailure(call: Call, e: IOException) {
+                                                                                                        callback.onFailure(call,e)
+                                                                                                    }
+                                                                                                    override fun onResponse(call: Call, response: Response) {
+                                                                                                        newUrl= response.request.url.toString().replace("/http/", "/https/")
+                                                                                                        HttpUtils()
+                                                                                                            .addHeader("User-Agent","ZhilinEai ZhilinBjutApp/2.5")
+                                                                                                            .addHeader("x-requested-with","cn.edu.bjut.app")
+                                                                                                            .addHeader("Cookie", cookies)
+                                                                                                            .get(newUrl,true,callback)
+                                                                                                    } }
+                                                                                            )
+                                                                                    } })
                                                                     } }
                                                             )
+
                                                     } }
                                             )
 
