@@ -3,6 +3,7 @@ package com.hlwdy.bjut.ui.card
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.icu.util.Calendar
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -187,6 +188,12 @@ class CardFragment : BaseFragment() {
         }
     }
 
+    private fun isNightTime(): Boolean {
+        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        // 检查是否在晚上23点到凌晨6点之间
+        return currentHour >= 23 || currentHour < 6
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -210,6 +217,10 @@ class CardFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (isNightTime()) {
+            binding.bannerLayout.visibility = View.VISIBLE
+        }
 
         isJumpCode = arguments?.getBoolean("jump_code", false) ?: false
         isJumped=false

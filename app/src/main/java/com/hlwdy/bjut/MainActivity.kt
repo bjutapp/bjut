@@ -53,7 +53,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun refreshWebVpn(isForce:Boolean=false){
+    fun refreshWebVpn(isForce:Boolean=false,tryTimes:Int=1){
+        if(tryTimes>3)return//异常重试
         fun getCookieValue(cookieString: String, key: String): String? {
             return cookieString.split(";")
                 .map { it.trim() }
@@ -75,6 +76,10 @@ class MainActivity : AppCompatActivity() {
             Callback {
             override fun onFailure(call: Call, e: IOException) {
                 showToast("network error")
+                if(!isForce){
+                    appLogger.e("Error", "Try WebVPN refresh($tryTimes) Error")
+                    refreshWebVpn(false,tryTimes+1)
+                }
             }
             override fun onResponse(call: Call, response: Response) {
                 var tk=getCookieValue(response.request.headers.get("Cookie").toString(),"wengine_vpn_ticketwebvpn_bjut_edu_cn")

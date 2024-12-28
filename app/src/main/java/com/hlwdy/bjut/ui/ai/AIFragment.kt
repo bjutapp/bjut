@@ -37,10 +37,9 @@ import io.noties.markwon.Markwon
 import io.noties.markwon.MarkwonConfiguration
 import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.html.HtmlPlugin
-/*
 import io.noties.markwon.ext.latex.JLatexMathPlugin
 import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin
-import io.noties.markwon.syntax.SyntaxHighlightPlugin*/
+/*import io.noties.markwon.syntax.SyntaxHighlightPlugin*/
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -154,8 +153,10 @@ class AIFragment : BaseFragment() {
             //.usePlugin(SyntaxHighlightPlugin.create())
             .usePlugin(TablePlugin.create(requireContext()))
             .usePlugin(HtmlPlugin.create())
-            //.usePlugin(MarkwonInlineParserPlugin.create())
-            //.usePlugin(JLatexMathPlugin.create(44f)) // 使用 JLatexMathPlugin
+            .usePlugin(MarkwonInlineParserPlugin.create())
+            .usePlugin(JLatexMathPlugin.create(48f){ builder ->
+                builder.inlinesEnabled(true)
+            })   // 使用 JLatexMathPlugin
             .build()
         adapter = ChatAdapter(markwon)
         binding.chatRecyclerView.apply {
@@ -171,7 +172,7 @@ class AIFragment : BaseFragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.isSendEnabled.collect { isEnabled ->
                     binding.sendButton.isEnabled = isEnabled
-                    binding.messageInput.isEnabled=isEnabled
+                    //binding.messageInput.isEnabled=isEnabled
                 }
             }
         }
@@ -278,7 +279,9 @@ class ChatAdapter(private val markwon: Markwon) : ListAdapter<ChatMessage, ChatA
                 constraintSet.connect(messageCard.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
                 constraintSet.applyTo(containerLayout)
             } else {
-                markwon.setMarkdown(messageText, message.content)
+                val pattern_latex = """(?<!\$)\$(?!\$)(.+?)(?<!\$)\$(?!\$)""".toRegex()
+                val ps=pattern_latex.replace(message.content) { matchResult ->  "$$${matchResult.groupValues[1]}$$" }
+                markwon.setMarkdown(messageText, ps)
                 // 接收的消息
                 theme.resolveAttribute(R.attr.receivedMessageBackgroundColor, typedValue, true)
                 messageCard.setCardBackgroundColor(typedValue.data)
@@ -581,7 +584,7 @@ class ChatViewModel : ViewModel() {
                 }
                 answerJson.optString("flag") == "stop" -> {
                     finalizeCurrentMessage()
-                    hideTypingIndicator()
+                    //hideTypingIndicator()
                 }
                 answerJson.has("responseText") -> {
                     val responseText = answerJson.optString("responseText")
@@ -609,7 +612,7 @@ class ChatViewModel : ViewModel() {
     private fun showTypingIndicator() {
         val currentMessages = _messages.value?.toMutableList() ?: mutableListOf()
         if (currentMessages.lastOrNull()?.isTyping != true) {
-            currentMessages.add(ChatMessage(content = "", isSentByMe = false, isTyping = true,isStreaming = true))
+            currentMessages.add(ChatMessage(content = "...", isSentByMe = false, isTyping = true,isStreaming = true))
             _messages.postValue(currentMessages)
         }
     }

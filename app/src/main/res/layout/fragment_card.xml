@@ -5,9 +5,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <WebView
+    <!-- 顶部横幅 -->
+    <LinearLayout
+        android:id="@+id/banner_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/card_view"/>
+        android:layout_height="wrap_content"
+        android:background="@color/bjut_blue"
+        android:elevation="4dp"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="提示 23:00-6:00时段无法使用一卡通页面"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <WebView
+        android:id="@+id/card_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/banner_layout"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
